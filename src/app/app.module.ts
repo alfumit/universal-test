@@ -9,13 +9,18 @@ import {HeroesComponent} from './heroes/heroes.component';
 
 import {TransferHttpCacheModule} from '@nguniversal/common';
 import { HeroDetailComponent } from './hero-detail/hero-detail.component';
+import { MessagesComponent } from './messages/messages.component';
+import { AppRoutingModule } from './/app-routing.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     HeroesComponent,
-    HeroDetailComponent
+    HeroDetailComponent,
+    MessagesComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'my-app'}),
@@ -25,7 +30,8 @@ import { HeroDetailComponent } from './hero-detail/hero-detail.component';
       { path: 'lazy/nested', loadChildren: './lazy/lazy.module#LazyModule'}
     ]),
     TransferHttpCacheModule,
-    FormsModule
+    FormsModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
