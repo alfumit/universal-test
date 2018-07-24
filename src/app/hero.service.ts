@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/internal/operators';
+import { catchError, tap } from 'rxjs/internal/operators';
 
 import { Hero } from './hero';
-import { HEROES } from './mock-heroes';
 import { MessageService } from './message.service';
-import {computeStyle} from '@angular/animations/browser/src/util';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +21,7 @@ export class HeroService {
     return this.http
       .get<Hero[]>(this.heroesUrl)
       .pipe(
-        tap(heroes => this.log('fetched heroes')),
+        tap(_ => this.log('fetched heroes')),
         catchError(this.handleError('getHeroes', []))
       );
   }
@@ -47,11 +45,45 @@ export class HeroService {
       );
   }
 
+  addHero(hero: Hero): Observable<Hero> {
+      const httpOptions = {
+          headers: new HttpHeaders({'Content-Type': 'application/json'})
+      };
+
+      return this.http.post<Hero>(this.heroesUrl, hero, httpOptions).pipe(
+        tap((her: Hero) => this.log(`added hero w/ id=${her.id}`)),
+        catchError(this.handleError<Hero>('addHero'))
+      );
+  }
+
+  deleteHero(hero: Hero | number): any {
+      const httpOptions = {
+          headers: new HttpHeaders({'Content-Type': 'application/json'})
+      };
+      const id = typeof hero === 'number' ? hero : hero.id;
+      const url = `${this.heroesUrl}/${id}`;
+
+      return this.http.delete<Hero>(url, httpOptions).pipe(
+        tap(_ => this.log('deleted hero id=${id}')),
+        catchError(this.handleError<Hero>('deleteHero'))
+      );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+      if (!term.trim()) {
+          return of([]);
+      }
+      return this.http.get<Hero[]>(`${this.heroesUrl}/?name=${term}`).pipe(
+        tap((her: Hero[]) => this.log(`found ${her.length} heroes matching ${term}`)),
+        catchError(this.handleError<Hero[]>('searchHeroes', []))
+      );
+  }
+
   private log(message: string) {
     this.messageService.add(`HeroService: ${message}`);
   }
 
-    private handleError<T> (operation = 'operation', result?: T) {
+  private handleError<T> (operation = 'operation', result?: T) {
         return (error: any): Observable<T> => {
 
             // TODO: send the error to remote logging infrastructure
